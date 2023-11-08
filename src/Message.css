@@ -1,0 +1,49 @@
+/* Message.css */
+.message {
+    padding: 12.5px;
+    border-radius: 15px;
+    margin: 10px;
+    max-width: 60%;
+}
+
+.left {
+    float: left;
+    clear: both;
+}
+
+.right {
+    float: right;
+    clear: both;
+    color: white;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.typing-dots-container {
+    display: inline-flex;
+}
+
+.typing-dot {
+    width: 7.5px;
+    height: 7.5px;
+    border-radius: 50%;
+    background-color: #555;
+    margin-right: 6px;
+    animation: typing 1s infinite;
+}
+
+@keyframes typing {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
+}
