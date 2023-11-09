@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MessageView.css';
 import Message from './Message';
+import Sidebar from './Sidebar';
 
 function MessageView(props) {
     const [messages, setMessages] = useState([]);
@@ -8,6 +9,31 @@ function MessageView(props) {
     const messageContainerRef = useRef();
     const lastMessageRef = useRef(null);
     const [isSendButtonDisabled, setIsSendButtonDisabled] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const [messagesMap, setMessagesMap] = useState({});
+    const [selectedPrompt, setSelectedPrompt] = useState(null);
+
+    // Add a state variable to track whether to create a new entry
+    const [createNewEntry, setCreateNewEntry] = useState(false);
+
+    const handleOpenSidebar = () => {
+        setIsSidebarOpen(true);
+    };
+
+    const handleCloseSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    const handleTabClick = (prompt) => {
+        setSelectedPrompt(prompt);
+        setMessages(messagesMap[prompt] || []);
+    };
+
+    const handleClearMessagesAndPrompt = () => {
+        setSelectedPrompt(null);
+        setMessages([]);
+    };
 
     const { user } = props;
 
@@ -68,7 +94,8 @@ function MessageView(props) {
     const generateResponse = async (userMessage) => {
         // Add a temporary empty ChatBot message
         const emptyChatBotMessage = { sender: 'ChatBot', contents: '' };
-        setMessages((prevMessages) => [emptyChatBotMessage, ...prevMessages]);
+
+        await setMessages((prevMessages) => [emptyChatBotMessage, ...prevMessages]);
 
         // Simulate an asynchronous operation (e.g., an API call)
         const response = await handleBotResponse(userMessage);
@@ -77,41 +104,71 @@ function MessageView(props) {
         emptyChatBotMessage.contents = response;
 
         // Update the state with the modified messages array
-        setMessages((prevMessages) => [...prevMessages]);
+        await setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            const emptyMessageIndex = updatedMessages.findIndex(
+                (message) => message.sender === 'ChatBot' && message.contents === ''
+            );
+            if (emptyMessageIndex !== -1) {
+                updatedMessages[emptyMessageIndex] = emptyChatBotMessage;
+            }
+            return updatedMessages;
+        });
 
-        return response;
+        return emptyChatBotMessage;
     };
 
-    const addMessage = (sender, contents) => {
-        const newMessage = { sender, contents };
-        setMessages((prevMessages) => [newMessage, ...prevMessages]);
-    };
 
     const handleUserMessage = async () => {
         if (newMessage.trim() !== '') {
             // Scroll to the bottom to show the initial message
             scrollToBottom();
-
             // Clear the input field
             setNewMessage('');
             // Disable button while loading
             setIsSendButtonDisabled(true);
 
             // Add the User message to the list of messages
-            addMessage(user, newMessage);
+            let currentPrompt = null;
 
-            // Generate the ChatBot response
-            const responseContents = await generateResponse(newMessage);
+            if (!selectedPrompt && newMessage in messagesMap) {
+
+                handleTabClick(newMessage);
+            }
+            else {
+                if (!selectedPrompt) {
+                    // Create a new prompt for the first message
+                    currentPrompt = newMessage.toString();
+
+                    await setSelectedPrompt(currentPrompt);
+                }
+                else {
+                    // Add the User message to the list of messages
+                    currentPrompt = selectedPrompt;
+                }
+
+                const userMessage = { sender: user, contents: newMessage };
+
+                await setMessages((prevMessages) => [userMessage, ...prevMessages]);
+
+                // Generate the ChatBot response
+                const botMessage = await generateResponse(newMessage);
+
+                const updatedMessagesMap = { ...messagesMap };
+
+                if (!updatedMessagesMap[currentPrompt]) {
+                    updatedMessagesMap[currentPrompt] = [];
+                }
+
+                updatedMessagesMap[currentPrompt].unshift(userMessage);
+                updatedMessagesMap[currentPrompt].unshift(botMessage);
+
+                await Promise.all([
+                    setMessagesMap(updatedMessagesMap),
+                ]);
+            }
 
             setIsSendButtonDisabled(false);
-        }
-    };
-
-    const updateLastMessage = (sender, contents) => {
-        const updatedMessages = [...messages];
-        if (updatedMessages.length > 0) {
-            updatedMessages[0] = { sender, contents };
-            setMessages(updatedMessages);
         }
     };
 
@@ -121,26 +178,43 @@ function MessageView(props) {
         }
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
     const handleMessageChange = (e) => {
         setNewMessage(e.target.value);
     };
 
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
     return (
         <div className="message-view">
+            <Sidebar
+                tabs={[
+                    ...Object.keys(messagesMap).map((prompt) => ({
+                        label: prompt,
+                        content: messagesMap[prompt].length + ' Messages',
+                    })),
+                    {
+                        label: "Create New Entry",
+                        content: "Start a new conversation",
+                    }
+                ]}
+                onTabClick={(prompt) => {handleTabClick(prompt)}}
+                isSidebarOpen={isSidebarOpen}
+                onCloseSidebar={handleCloseSidebar}
+                onClearMessagesAndPrompt={handleClearMessagesAndPrompt}
+            />
             <div className="header">
+                <button className="button" onClick={handleOpenSidebar}>
+                    History
+                </button>
                 <img
                     src={process.env.PUBLIC_URL + '/rapp_logo.svg'}
                     alt="RAPP Logo"
                     className="logo"
                 />
-                <h1>
-                    QA ChatBot Demo
-                </h1>
             </div>
+
             <div className="message-container" ref={messageContainerRef}>
                 {messages.slice().reverse().map((message, index) => (
                     <Message

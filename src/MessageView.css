@@ -17,6 +17,25 @@
     padding: 20px;
 }
 
+.button {
+    height: calc(100% - 40px); /* Set the height relative to the header's height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 15px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: orange;
+}
+
+.button-label {
+    width: 100%; /* Ensure the image label fits within the button */
+    height: auto; /* Ensure the image label fits within the button */
+}
+
 .message-container {
     height: 90%;
     max-height: calc(90% - 80px);
@@ -66,3 +85,4 @@
 .send-button {
     margin-left: 2.5%;
 }
+

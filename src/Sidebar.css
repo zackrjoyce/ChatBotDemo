@@ -1,0 +1,46 @@
+/* Sidebar.css */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -50%; /* Initially off-screen */
+  width: 50%;
+  height: 100%;
+  background-color: #fff;
+  transition: left 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.open {
+  left: 0; /* Move into view */
+}
+
+.close-button {
+  background-color: #ccc;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.tabs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-button {
+  background-color: #f2f2f2;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #e2e2e2;
+  }
+}
