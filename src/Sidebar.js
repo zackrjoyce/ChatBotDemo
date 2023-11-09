@@ -1,6 +1,13 @@
 import React from 'react';
 import './Sidebar.css';
 
+/*Sidebar component:
+    tabs: map representing prompts with corresponding messages,
+    onTabClick: function to set properties when tab is clicked
+    IsSidebarOpen: function to set sidebar visible
+    onCloseSidebar: function to close sidebar
+    onClearMessagesAndPrompt: Called on Create New Entry to clear chat and prompt
+*/
 function Sidebar({ tabs, onTabClick, isSidebarOpen, onCloseSidebar, onClearMessagesAndPrompt }) {
     return (
         <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
@@ -15,7 +22,6 @@ function Sidebar({ tabs, onTabClick, isSidebarOpen, onCloseSidebar, onClearMessa
                             if (tab.label === "Create New Entry") {
                                 onClearMessagesAndPrompt();
                             } else {
-                                console.log("New prompt: " + tab.label);
                                 onTabClick(tab.label);
                             }
                             onCloseSidebar();

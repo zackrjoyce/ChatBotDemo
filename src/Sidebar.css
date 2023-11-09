@@ -2,7 +2,7 @@
 .sidebar {
   position: fixed;
   top: 0;
-  left: -50%; /* Initially off-screen */
+  left: -50%;
   width: 50%;
   height: 100%;
   background-color: #fff;
@@ -13,7 +13,7 @@
 }
 
 .open {
-  left: 0; /* Move into view */
+  left: 0;
 }
 
 .close-button {
